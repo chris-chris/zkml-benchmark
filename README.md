@@ -2,9 +2,9 @@
 
 ## Introduction
 
-This project demonstrates the implementation of both Linear Regression and a Multi-Layer Perceptron (MLP) using the `o1js` library. 
-The Linear Regression model serves as a fundamental building block, while the MLP is designed to take five input values and predict an output through two hidden layers. 
-Additionally, we provide a Jupyter Notebook implemented in PyTorch that mimics the structure of the MLP defined in `o1js`. 
+This project demonstrates the implementation of both Linear Regression and a Multi-Layer Perceptron (MLP) using the `o1js` library.
+The Linear Regression model serves as a fundamental building block, while the MLP is designed to take five input values and predict an output through two hidden layers.
+Additionally, we provide a Jupyter Notebook implemented in PyTorch that mimics the structure of the MLP defined in `o1js`.
 
 ## How to Run
 
@@ -15,22 +15,22 @@ Additionally, we provide a Jupyter Notebook implemented in PyTorch that mimics t
 
 ### Steps to Execute
 
-1. **Build the project**: 
-This step compiles TypeScript code (`mlp.ts`) into JavaScript (`mlp.js`).
-   
+1. **Build the project**:
+   This step compiles TypeScript code (`mlp.ts`) into JavaScript (`mlp.js`).
+
    ```bash
    npm run build
    ```
 
-2. **Run the project**: 
-Execute the compiled JavaScript file.
-   
+2. **Run the project**:
+   Execute the compiled JavaScript file.
+
    ```bash
    node dist/mlp.js
    ```
 
-3. **Benchmarking**: 
-To benchmark the performance of the Linear Regression and MLP implementations, you can use `gtime` to measure execution time.
+3. **Benchmarking**:
+   To benchmark the performance of the Linear Regression and MLP implementations, you can use `gtime` to measure execution time.
 
    Run the script to install `gtime`:
 
@@ -41,26 +41,25 @@ To benchmark the performance of the Linear Regression and MLP implementations, y
    **Run the benchmarks**: After installing `gtime`, you can benchmark the two models by running the following commands:
 
    ```bash
-   gtime node dist/mlp.js
-   gtime node dist/linear_regression.js
+   sh bench.sh
    ```
 
-4. **Jupyter Notebook**: 
-The project includes a Jupyter Notebook (`src/notebook/mlp_comparison.ipynb`) that implements the same MLP model in PyTorch as defined in the `o1js` TypeScript code. 
-This notebook allows you to compare the outputs of both models.
+4. **Jupyter Notebook**:
+   The project includes a Jupyter Notebook (`src/notebook/mlp_comparison.ipynb`) that implements the same MLP model in PyTorch as defined in the `o1js` TypeScript code.
+   This notebook allows you to compare the outputs of both models.
 
    To run the notebook:
 
-   1. Navigate to the `src/notebook` directory.
+   1. Navigate to the `models/mlp` directory.
 
       ```bash
-      cd src/notebook
+      cd models/mlp
       ```
 
    2. Open the notebook using Jupyter:
 
       ```bash
-      jupyter notebook ./notebook/mlp.ipynb
+      jupyter notebook ./mlp.ipynb
       ```
 
    3. Execute the cells to see the PyTorch implementation of the MLP and compare it with the `o1js` version.
@@ -105,15 +104,18 @@ Input Layer (5 inputs)
 Output
 ```
 
-## Result
+## Benchmark Result
 
 ```bash
-# o1js
-node dist/mlp.js
-
-start
-making proof
-proof created
-value:  2615
-Proof is valid: true
+model,exp_num,proving_time,memory_usage,cpu_usage
+ezkl,1,67.66,1344276,757%
+o1js,1,165.54,1090636,841%
+ezkl,2,70.15,1343040,748%
+o1js,2,208.12,1168216,864%
+ezkl,3,69.18,1360868,688%
+o1js,3,201.29,1166896,849%
+ezkl,4,69.08,1319804,711%
+o1js,4,198.60,1147124,862%
+ezkl,5,68.62,1355372,770%
+o1js,5,223.88,1216168,881%
 ```
