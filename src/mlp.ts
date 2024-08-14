@@ -1,7 +1,15 @@
-import { Field, ZkProgram, Int64, Provable, verify } from "o1js";
+import {
+  Field,
+  ZkProgram,
+  Int64,
+  Provable,
+  verify,
+  UInt32,
+  UInt64,
+} from "o1js";
 import * as fs from "fs/promises";
-import { relu } from "./relu";
 
+import { relu } from "./relu";
 // 선형 변환을 수행하는 모듈화된 레이어 함수
 function linearLayer(input: Int64[], weights: Int64[], bias: Int64): Int64 {
   let z = Int64.from(0);
@@ -19,49 +27,58 @@ function perceptron(input: Int64[], weights: Int64[], bias: Int64): Int64 {
 }
 
 // MLP 모델 정의
-const MLP = ZkProgram({
-  name: "MLP",
-  publicOutput: Int64,
-  methods: {
-    predict: {
-      privateInputs: [Provable.Array(Int64, 5)], // 5개의 입력값
-      async method(input: Int64[]): Promise<Int64> {
-        // 첫 번째 히든 레이어
-        const weights1: Int64[] = [
-          Int64.from(2),
-          Int64.from(4),
-          Int64.from(3),
-          Int64.from(1),
-          Int64.from(5),
-        ];
-        const bias1: Int64 = Int64.from(3);
-        const a1 = perceptron(input, weights1, bias1);
+function createMLPProgram(depth: number) {
+  return ZkProgram({
+    name: `MLP_Depth_${depth}`,
+    publicOutput: Int64,
+    methods: {
+      predict: {
+        privateInputs: [Provable.Array(Int64, 5)], // 5개의 입력값
+        async method(input: Int64[]): Promise<Int64> {
+          let a = input;
+          for (let i = 0; i < depth; i++) {
+            const weights = [
+              Int64.from(2 + i),
+              Int64.from(4 + i),
+              Int64.from(3 + i),
+              Int64.from(1 + i),
+              Int64.from(5 + i),
+            ];
+            const bias = Int64.from(3 + i);
+            a = [
+              perceptron(a, weights, bias),
+              perceptron(a, weights, bias),
+              perceptron(a, weights, bias),
+              perceptron(a, weights, bias),
+              perceptron(a, weights, bias),
+            ];
+          }
 
-        // 두 번째 히든 레이어
-        const weights2: Int64[] = [
-          Int64.from(3),
-          Int64.from(1),
-          Int64.from(4),
-          Int64.from(2),
-          Int64.from(6),
-        ];
-        const bias2: Int64 = Int64.from(2);
-        const a2 = perceptron([a1, a1, a1, a1, a1], weights2, bias2); // 각 z1 값을 복제해서 전달
+          const weightsOut = [Int64.from(1)];
+          const biasOut = Int64.from(5);
+          const zOut = linearLayer(a, weightsOut, biasOut);
 
-        // 출력 레이어
-        const weights3: Int64[] = [Int64.from(1)]; // 활성화 함수 출력값 하나에 대한 가중치
-        const bias3: Int64 = Int64.from(5);
-        const z3 = linearLayer([a2], weights3, bias3);
-
-        // 최종 출력값 반환
-        return z3;
+          return zOut;
+        },
       },
     },
-  },
-});
+  });
+}
 
+// 모델 사용 예제
 (async () => {
-  console.log("start");
+  const args = process.argv.slice(2); // 명령줄 인수 받기
+  const depth = parseInt(args[0], 10); // 첫 번째 인수를 depth로 사용
+
+  if (isNaN(depth) || depth < 1 || depth > 5) {
+    console.error("Please provide a valid depth (1-5).");
+    process.exit(1);
+  }
+
+  console.log(`Creating MLP model with depth ${depth}...`);
+
+  // MLP 모델 생성
+  const MLP = createMLPProgram(depth);
 
   // 입력 데이터 (5개의 입력값)
   let input = [
@@ -72,21 +89,14 @@ const MLP = ZkProgram({
     Int64.from(3),
   ];
 
-  // 증명 키 컴파일
+  // MLP 실행
   const { verificationKey } = await MLP.compile();
-  console.log("making proof");
+  console.log(`Making proof for MLP with depth ${depth}...`);
 
-  // 예측 수행
   const proof = await MLP.predict(input);
-  console.log("proof created: ", proof.proof);
-  console.log("value: ", proof.publicOutput.toString());
+  console.log(`Proof created for MLP with depth ${depth}: `, proof.proof);
+  console.log("Value: ", proof.publicOutput.toString());
 
-  // 증명 검증 함수
-  const verifyProof = async (proof: any, verificationKey: any) => {
-    return await verify(proof, verificationKey);
-  };
-
-  // 검증 수행
-  const isValid = await verifyProof(proof, verificationKey);
-  console.log("Proof is valid:", isValid);
+  const isValid = await verify(proof, verificationKey);
+  console.log(`Proof is valid for depth ${depth}:`, isValid);
 })();

@@ -1,30 +1,38 @@
-
-
 #!/bin/bash
 
 # Create directories for logs if they don't exist
 mkdir -p logs
 
-# Run o1js script with gtime and capture output
-echo "Running o1js script..."
-gtime -v node dist/mlp.js &> logs/o1js_log.txt
-echo "o1js script completed. Log saved to logs/o1js_log.txt."
+# CSV 파일 초기화
+output_csv="experiment_results.csv"
+echo "model,exp_num,proving_time,memory_usage,cpu_usage" > $output_csv
 
-# Run ezkl script with gtime and capture output
-echo "Running ezkl script..."
-gtime -v ezkl prove --witness models/mlp/witness.json --pk-path models/mlp/pk.key --compiled-circuit models/mlp/model.compiled --proof-path models/mlp/proof.json &> logs/ezkl_log.txt
-echo "ezkl script completed. Log saved to logs/ezkl_log.txt."
+# MLP 모델에 대한 실험 루프
+for i in {1..5}; do
+    echo "Running ezkl script for MLP experiment $i..."
 
-# Extract and display relevant information from the logs
-echo -e "\nPerformance Summary:"
-echo "===================="
-echo "o1js:"
-grep "User time (seconds)" logs/o1js_log.txt
-grep "Maximum resident set size" logs/o1js_log.txt
-grep "Percent of CPU this job got" logs/o1js_log.txt
+    # gtime을 사용하여 ezkl 명령 실행 및 로그 저장
+    gtime -v ezkl prove --witness models/mlp/mlp$i/witness.json --pk-path models/mlp/mlp$i/pk.key --compiled-circuit models/mlp/mlp$i/model.compiled --proof-path models/mlp/mlp$i/proof.json &> logs/ezkl_mlp${i}_log.txt
+    
+    # 성능 데이터 추출
+    proving_time=$(grep "User time (seconds)" logs/ezkl_mlp${i}_log.txt | awk '{print $4}')
+    memory_usage=$(grep "Maximum resident set size" logs/ezkl_mlp${i}_log.txt | awk '{print $6}')
+    cpu_usage=$(grep "Percent of CPU this job got" logs/ezkl_mlp${i}_log.txt | awk '{print $7}')
+    
+    # CSV 파일에 결과 저장
+    echo "mlp,$i,$proving_time,$memory_usage,$cpu_usage" >> $output_csv
 
-echo "===================="
-echo "ezkl:"
-grep "User time (seconds)" logs/ezkl_log.txt
-grep "Maximum resident set size" logs/ezkl_log.txt
-grep "Percent of CPU this job got" logs/ezkl_log.txt
+    echo "Running o1js script for MLP experiment $i..."
+    
+    gtime -v node dist/mlp.js $i &> logs/o1js_mlp${i}_log.txt
+
+    # 성능 데이터 추출
+    proving_time=$(grep "User time (seconds)" logs/o1js_mlp${i}_log.txt | awk '{print $4}')
+    memory_usage=$(grep "Maximum resident set size" logs/o1js_mlp${i}_log.txt | awk '{print $6}')
+    cpu_usage=$(grep "Percent of CPU this job got" logs/o1js_mlp${i}_log.txt | awk '{print $7}')
+    
+    # CSV 파일에 결과 저장
+    echo "o1js,$i,$proving_time,$memory_usage,$cpu_usage" >> $output_csv
+done
+
+echo "Experiment completed. Results saved to $output_csv."
