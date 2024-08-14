@@ -1,0 +1,25 @@
+{
+  "name": "o1js_example",
+  "version": "1.0.0",
+  "description": "Example of using o1js for linear regression",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "o1js",
+    "linear regression",
+    "gadgets"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "o1js": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.14.31",
+    "typescript": "^5.5.4"
+  }
+}
