@@ -8,7 +8,7 @@ output_csv="experiment_results.csv"
 echo "framework,model,exp_num,proving_time,memory_usage,cpu_usage" > $output_csv
 
 # MLP 모델에 대한 실험 루프
-for i in {1..5}; do
+for i in {1..20}; do
     echo "Running ezkl script for MLP experiment $i..."
 
     # gtime을 사용하여 ezkl 명령 실행 및 로그 저장
