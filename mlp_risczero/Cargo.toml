@@ -1,15 +1,11 @@
-[package]
-name = "mlp_risczero"
-version = "0.1.0"
-edition = "2021"
+[workspace]
+resolver = "2"
+members = ["host", "methods", "model_data"]
 
-[dependencies]
-smartcore = { version = "0.3.2", features = ["serde"] }
-serde = { version = "1.0", features = ["derive"], optional = true }
-serde_json = "1.0"
-ndarray = "0.15"
-rmp-serde = "1.1.2"
+# Always optimize; building and running the guest takes much longer without optimization.
+[profile.dev]
+opt-level = 3
 
-[features]
-default = ["serde"]
-
+[profile.release]
+debug = 1
+lto = true

@@ -1,4 +1,4 @@
 framework,model,exp_num,proving_time,memory_usage,cpu_usage
-ezkl,mlp,1,0.00,6752,63%
-o1js,mlp,1,121.35,863088,527%
-risczero,mlp,1,0.07,3368,10%
+ezkl,mlp,1,0.00,6608,39%
+o1js,mlp,1,7.10,296656,449%
+risczero,mlp,1,311.72,1989392,619%
