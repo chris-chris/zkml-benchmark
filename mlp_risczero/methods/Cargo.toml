@@ -12,3 +12,8 @@ methods = ["guest"]
 [[bin]]
 name = "guest"
 path = "guest/src/main.rs"
+
+[dependencies]
+ndarray = "0.16.1"
+rmp-serde = "1.3.0"
+smartcore = "0.3.2"
