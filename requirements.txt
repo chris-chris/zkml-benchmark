@@ -4,3 +4,5 @@ onnx==1.16.2
 ezkl==12.0.1
 nbconvert==7.16.4
 jupyterlab==4.2.4
+pandas
+scikit-learn
