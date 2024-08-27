@@ -22,6 +22,10 @@ run_benchmark() {
     local command=$3
     local log_file="logs/${framework}_mlp${exp_num}_log.txt"
 
+    if [ "$framework" == "ezkl" ]; then
+        EXP_NUM=$exp_num jupyter nbconvert --to notebook --execute models/mlp/mlp.ipynb
+    fi
+
     echo "Running ${framework} script for MLP experiment $exp_num..."
 
     if [ "$framework" == "risczero" ]; then
@@ -45,7 +49,7 @@ for i in {1..5}; do
     run_benchmark "o1js" $i "node dist/mlp.js $i"
     # run_benchmark "orion" $i "scarb run --path models/linear_regression/orion"
     # run_benchmark "orion" $i "jupyter nbconvert --to notebook --execute ./models/mlp/orion/orion.ipynb --output orion_output"
-    run_benchmark "risczero" $i "./zkvm"
+    run_benchmark "risczero" $i "cd mlp_risczero && ./zkvm"
 done
 
 echo "Experiment completed. Results saved to $output_csv."
