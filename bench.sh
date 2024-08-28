@@ -45,8 +45,8 @@ run_benchmark() {
 
 # MLP 모델에 대한 실험 루프
 for i in {1..5}; do
-    # run_benchmark "ezkl" $i "ezkl prove --witness models/mlp/mlp$i/witness.json --pk-path models/mlp/mlp$i/pk.key --compiled-circuit models/mlp/mlp$i/model.compiled --proof-path models/mlp/mlp$i/proof.json"
-    run_benchmark "ezkl" $i "ezkl prove --witness models/mlp22/mlp$i/witness.json --pk-path models/mlp22/mlp$i/pk.key --compiled-circuit models/mlp22/mlp$i/model.compiled --proof-path models/mlp22/mlp$i/proof.json"
+    run_benchmark "ezkl" $i "ezkl prove --witness models/mlp/mlp$i/witness.json --pk-path models/mlp/mlp$i/pk.key --compiled-circuit models/mlp/mlp$i/model.compiled --proof-path models/mlp/mlp$i/proof.json"
+    run_benchmark "o1js" $i "node dist/mlp_recursion.js $i"
     # run_benchmark "o1js" $i "node dist/mlp.js $i"
     # run_benchmark "orion" $i "scarb run --path models/linear_regression/orion"
     # run_benchmark "orion" $i "jupyter nbconvert --to notebook --execute ./models/mlp/orion/orion.ipynb --output orion_output"

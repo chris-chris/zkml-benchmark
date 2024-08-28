@@ -1,6 +1,11 @@
 framework,model,exp_num,proving_time,memory_usage,cpu_usage
-ezkl,mlp,1,47.27,1291088,537%
-ezkl,mlp,2,47.20,1287920,539%
-ezkl,mlp,3,48.50,1271632,535%
-ezkl,mlp,4,49.36,1294544,529%
-ezkl,mlp,5,48.61,1304640,519%
+ezkl,mlp,1,0.00,976,100%
+o1js,mlp,1,101.95,994400,504%
+ezkl,mlp,2,0.00,992,78%
+o1js,mlp,2,117.02,956560,505%
+ezkl,mlp,3,0.00,992,7%
+o1js,mlp,3,132.40,1010752,504%
+ezkl,mlp,4,0.00,992,0%
+o1js,mlp,4,167.32,1011344,512%
+ezkl,mlp,5,0.00,1024,0%
+o1js,mlp,5,228.48,1067872,510%
