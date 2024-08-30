@@ -74,6 +74,23 @@ const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) => (0, o1js_1.ZkProg
         },
     },
 }));
+function createSecondProgram(depth) {
+    return (0, o1js_1.ZkProgram)({
+        name: `SecondMLP_${depth}`,
+        publicOutput: o1js_1.UInt32,
+        methods: {
+            computeFinal: {
+                privateInputs: [o1js_1.Provable.Array(o1js_1.UInt32, depth)], // 'depth' 개의 입력값
+                async method(inputs) {
+                    const weightsOut = Array(depth).fill(o1js_1.UInt32.from(2));
+                    const biasOut = o1js_1.UInt32.from(0);
+                    const finalOutput = linearLayer(inputs, weightsOut, biasOut);
+                    return finalOutput;
+                },
+            },
+        },
+    });
+}
 // 모델 사용 예제
 (async () => {
     const args = process.argv.slice(2); // 명령줄 인수 받기
@@ -104,14 +121,15 @@ const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) => (0, o1js_1.ZkProg
     console.log(`First proof and output generated and copied ${depth} times.`);
     // 해당하는 SecondMLP 프로그램 선택
     console.log(`\nCreating SecondMLP_${expNum} model...`);
-    const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
+    // const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
+    const SecondPro = createSecondProgram(depth);
     // SecondMLP 프로그램 컴파일
-    const { verificationKey: vk2 } = await SecondMLPProgram.compile({
+    const { verificationKey: vk2 } = await SecondPro.compile({
         cache: o1js_1.Cache.FileSystemDefault,
         forceRecompile: false,
     });
     console.log(`Generating final proof for SecondMLP_${expNum}...`);
-    const finalProof = await SecondMLPProgram.computeFinal(inputsArray);
+    const finalProof = await SecondPro.computeFinal(inputsArray);
     // 증명 검증
     // console.log(`\nVerifying all the proofs, proof count: ${proofsArray.length + 1}`);
     // for (let i = 0; i < proofsArray.length; i++) {

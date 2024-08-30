@@ -75,16 +75,36 @@ function createMLPProgram(depth: number) {
 // SecondMLPPrograms
 
 // SecondMLPProgram 정의: Array 크기를 2^i로 설정한 10개의 함수
-const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
-  ZkProgram({
-    name: `SecondMLP_${i + 1}`,
+// const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
+//   ZkProgram({
+//     name: `SecondMLP_${i + 1}`,
+//     publicOutput: UInt32,
+
+//     methods: {
+//       computeFinal: {
+//         privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
+//         async method(inputs: UInt32[]): Promise<UInt32> {
+//           const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
+//           const biasOut = UInt32.from(0);
+//           const finalOutput = linearLayer(inputs, weightsOut, biasOut);
+
+//           return finalOutput;
+//         },
+//       },
+//     },
+//   })
+// );
+
+function createSecondProgram(depth: number) {
+  return ZkProgram({
+    name: `SecondMLP_${depth}`,
     publicOutput: UInt32,
 
     methods: {
       computeFinal: {
-        privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
+        privateInputs: [Provable.Array(UInt32, depth)], // 'depth' 개의 입력값
         async method(inputs: UInt32[]): Promise<UInt32> {
-          const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
+          const weightsOut: UInt32[] = Array(depth).fill(UInt32.from(2));
           const biasOut = UInt32.from(0);
           const finalOutput = linearLayer(inputs, weightsOut, biasOut);
 
@@ -92,8 +112,8 @@ const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
         },
       },
     },
-  })
-);
+  });
+}
 
 // 모델 사용 예제
 (async () => {
@@ -132,16 +152,16 @@ const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
 
   // 해당하는 SecondMLP 프로그램 선택
   console.log(`\nCreating SecondMLP_${expNum} model...`);
-  const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
-
+  // const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
+  const SecondPro = createSecondProgram(depth);
   // SecondMLP 프로그램 컴파일
-  const { verificationKey: vk2 } = await SecondMLPProgram.compile({
+  const { verificationKey: vk2 } = await SecondPro.compile({
     cache: Cache.FileSystemDefault,
     forceRecompile: false,
   });
   console.log(`Generating final proof for SecondMLP_${expNum}...`);
 
-  const finalProof = await SecondMLPProgram.computeFinal(inputsArray);
+  const finalProof = await SecondPro.computeFinal(inputsArray);
 
   // 증명 검증
   // console.log(`\nVerifying all the proofs, proof count: ${proofsArray.length + 1}`);
