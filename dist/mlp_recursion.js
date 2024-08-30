@@ -59,21 +59,23 @@ function createMLPProgram(depth) {
 }
 // SecondMLPPrograms
 // SecondMLPProgram 정의: Array 크기를 2^i로 설정한 10개의 함수
-const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) => (0, o1js_1.ZkProgram)({
-    name: `SecondMLP_${i + 1}`,
-    publicOutput: o1js_1.UInt32,
-    methods: {
-        computeFinal: {
-            privateInputs: [o1js_1.Provable.Array(o1js_1.UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
-            async method(inputs) {
-                const weightsOut = Array(2 ** (i + 1)).fill(o1js_1.UInt32.from(2));
-                const biasOut = o1js_1.UInt32.from(0);
-                const finalOutput = linearLayer(inputs, weightsOut, biasOut);
-                return finalOutput;
-            },
-        },
-    },
-}));
+// const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
+//   ZkProgram({
+//     name: `SecondMLP_${i + 1}`,
+//     publicOutput: UInt32,
+//     methods: {
+//       computeFinal: {
+//         privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
+//         async method(inputs: UInt32[]): Promise<UInt32> {
+//           const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
+//           const biasOut = UInt32.from(0);
+//           const finalOutput = linearLayer(inputs, weightsOut, biasOut);
+//           return finalOutput;
+//         },
+//       },
+//     },
+//   })
+// );
 function createSecondProgram(depth) {
     return (0, o1js_1.ZkProgram)({
         name: `SecondMLP_${depth}`,
@@ -93,12 +95,15 @@ function createSecondProgram(depth) {
 }
 // 모델 사용 예제
 (async () => {
+    var startDate = new Date();
     const args = process.argv.slice(2); // 명령줄 인수 받기
     expNum = parseInt(args[0], 10); // 첫 번째 인수를 depth로 사용
     depth = 2 ** expNum;
     console.log(`Creating FirstMLP model with depth ${depth}...`);
     // 첫 번째 MLP 모델 생성
     const FirstMLP = createMLPProgram(1); // 첫 번째 MLP는 한 번만 수행
+    var seconds = (new Date().getTime() - startDate.getTime()) / 1000;
+    console.log(`seconds: ${seconds}s`);
     // 입력 데이터 (4개의 입력값)
     const input = [
         o1js_1.UInt32.from(5),
@@ -112,13 +117,19 @@ function createSecondProgram(depth) {
         forceRecompile: false,
     });
     console.log(`Making proof for FirstMLP...`);
+    var seconds = (new Date().getTime() - startDate.getTime()) / 1000;
+    console.log(`seconds: ${seconds}s`);
     const singleProof = await FirstMLP.predict(input);
     const singleOutput = singleProof.publicOutput;
+    var seconds = (new Date().getTime() - startDate.getTime()) / 1000;
+    console.log(`seconds: ${seconds}s`);
     // 첫 번째 MLP 결과를 depth 만큼 복사
     const inputsArray = Array(depth).fill(singleOutput);
     // const proofsArray: SelfProof<undefined, UInt32>[] =
     //   Array(depth).fill(singleProof);
     console.log(`First proof and output generated and copied ${depth} times.`);
+    var seconds = (new Date().getTime() - startDate.getTime()) / 1000;
+    console.log(`seconds: ${seconds}s`);
     // 해당하는 SecondMLP 프로그램 선택
     console.log(`\nCreating SecondMLP_${expNum} model...`);
     // const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
@@ -129,6 +140,8 @@ function createSecondProgram(depth) {
         forceRecompile: false,
     });
     console.log(`Generating final proof for SecondMLP_${expNum}...`);
+    var seconds = (new Date().getTime() - startDate.getTime()) / 1000;
+    console.log(`seconds: ${seconds}s`);
     const finalProof = await SecondPro.computeFinal(inputsArray);
     // 증명 검증
     // console.log(`\nVerifying all the proofs, proof count: ${proofsArray.length + 1}`);
