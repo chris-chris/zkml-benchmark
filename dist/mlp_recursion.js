@@ -54,6 +54,15 @@ function createMLPProgram(depth) {
                     return zOut;
                 },
             },
+            computeFinal: {
+                privateInputs: [o1js_1.Provable.Array(o1js_1.UInt32, depth)], // 'depth' 개의 입력값
+                async method(inputs) {
+                    const weightsOut = Array(depth).fill(o1js_1.UInt32.from(0));
+                    const biasOut = o1js_1.UInt32.from(0);
+                    const finalOutput = linearLayer(inputs, weightsOut, biasOut);
+                    return finalOutput;
+                },
+            },
         },
     });
 }
@@ -76,23 +85,23 @@ function createMLPProgram(depth) {
 //     },
 //   })
 // );
-function createSecondProgram(depth) {
-    return (0, o1js_1.ZkProgram)({
-        name: `SecondMLP_${depth}`,
-        publicOutput: o1js_1.UInt32,
-        methods: {
-            computeFinal: {
-                privateInputs: [o1js_1.Provable.Array(o1js_1.UInt32, depth)], // 'depth' 개의 입력값
-                async method(inputs) {
-                    const weightsOut = Array(depth).fill(o1js_1.UInt32.from(2));
-                    const biasOut = o1js_1.UInt32.from(0);
-                    const finalOutput = linearLayer(inputs, weightsOut, biasOut);
-                    return finalOutput;
-                },
-            },
-        },
-    });
-}
+// function createSecondProgram(depth: number) {
+//   return ZkProgram({
+//     name: `SecondMLP_${depth}`,
+//     publicOutput: UInt32,
+//     methods: {
+//       computeFinal: {
+//         privateInputs: [Provable.Array(UInt32, depth)], // 'depth' 개의 입력값
+//         async method(inputs: UInt32[]): Promise<UInt32> {
+//           const weightsOut: UInt32[] = Array(depth).fill(UInt32.from(2));
+//           const biasOut = UInt32.from(0);
+//           const finalOutput = linearLayer(inputs, weightsOut, biasOut);
+//           return finalOutput;
+//         },
+//       },
+//     },
+//   });
+// }
 // 모델 사용 예제
 (async () => {
     var startDate = new Date();
@@ -133,16 +142,16 @@ function createSecondProgram(depth) {
     // 해당하는 SecondMLP 프로그램 선택
     console.log(`\nCreating SecondMLP_${expNum} model...`);
     // const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
-    const SecondPro = createSecondProgram(depth);
+    // const SecondPro = createSecondProgram(depth);
     // SecondMLP 프로그램 컴파일
-    const { verificationKey: vk2 } = await SecondPro.compile({
-        cache: o1js_1.Cache.FileSystemDefault,
-        forceRecompile: false,
-    });
+    // const { verificationKey: vk2 } = await SecondPro.compile({
+    //   cache: Cache.FileSystemDefault,
+    //   forceRecompile: false,
+    // });
     console.log(`Generating final proof for SecondMLP_${expNum}...`);
     var seconds = (new Date().getTime() - startDate.getTime()) / 1000;
     console.log(`seconds: ${seconds}s`);
-    const finalProof = await SecondPro.computeFinal(inputsArray);
+    const finalProof = await FirstMLP.computeFinal(inputsArray);
     // 증명 검증
     // console.log(`\nVerifying all the proofs, proof count: ${proofsArray.length + 1}`);
     // for (let i = 0; i < proofsArray.length; i++) {
