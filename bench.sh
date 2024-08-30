@@ -40,12 +40,12 @@ run_benchmark() {
     extract_performance_data "$log_file"
     
     # CSV 파일에 결과 저장
-    echo "${framework},mlp,$exp_num,$proving_time,$memory_usage,$cpu_usage" >> $output_csv
+    echo "${framework},recursion,$exp_num,$proving_time,$memory_usage,$cpu_usage" >> $output_csv
 }
 
 # MLP 모델에 대한 실험 루프
 for i in {1..5}; do
-    run_benchmark "ezkl" $i "ezkl prove --witness models/mlp/mlp$i/witness.json --pk-path models/mlp/mlp$i/pk.key --compiled-circuit models/mlp/mlp$i/model.compiled --proof-path models/mlp/mlp$i/proof.json"
+    run_benchmark "ezkl" $i "ezkl prove --witness models/recursion/mlp$i/witness.json --pk-path models/recursion/mlp$i/pk.key --compiled-circuit models/recursion/mlp$i/model.compiled --proof-path models/recursion/mlp$i/proof.json"
     run_benchmark "o1js" $i "node dist/mlp_recursion.js $i"
     # run_benchmark "o1js" $i "node dist/mlp.js $i"
     # run_benchmark "orion" $i "scarb run --path models/linear_regression/orion"
