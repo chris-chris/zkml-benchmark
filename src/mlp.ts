@@ -1,9 +1,4 @@
-import {
-  ZkProgram,
-  Int64,
-  Provable,
-  Cache,
-} from "o1js";
+import { ZkProgram, Int64, Provable, Cache } from "o1js";
 
 import { relu } from "./relu";
 // 선형 변환을 수행하는 모듈화된 레이어 함수
@@ -38,11 +33,9 @@ function createMLPProgram(depth: number) {
               Int64.from(0),
               Int64.from(0),
               Int64.from(0),
-              Int64.from(0),
             ];
             const bias = Int64.from(0);
             a = [
-              perceptron(a, weights, bias),
               perceptron(a, weights, bias),
               perceptron(a, weights, bias),
               perceptron(a, weights, bias),
@@ -78,14 +71,8 @@ function createMLPProgram(depth: number) {
   // MLP 모델 생성
   const MLP = createMLPProgram(depth);
 
-  // 입력 데이터 (5개의 입력값)
-  let input = [
-    Int64.from(0),
-    Int64.from(0),
-    Int64.from(0),
-    Int64.from(0),
-    Int64.from(0),
-  ];
+  // 입력 데이터 (4개의 입력값)
+  let input = [Int64.from(0), Int64.from(0), Int64.from(0), Int64.from(0)];
 
   // MLP 실행
   const { verificationKey } = await MLP.compile({
