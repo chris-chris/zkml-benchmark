@@ -4,7 +4,7 @@
 mkdir -p logs
 
 # CSV 파일 초기화
-output_csv="experiment_results.csv"
+output_csv="experiment_recursion.csv"
 echo "framework,model,exp_num,proving_time,memory_usage,cpu_usage" > $output_csv
 
 # 함수: 성능 데이터를 추출하는 기능
@@ -46,9 +46,9 @@ run_benchmark() {
 # MLP 모델에 대한 실험 루프
 # for i in {1..5}; do
 
-for i in {1..10}; do
+for i in {1..12}; do
     run_benchmark "ezkl" $i "ezkl prove --witness models/recursion/mlp$i/witness.json --pk-path models/recursion/mlp$i/pk.key --compiled-circuit models/recursion/mlp$i/model.compiled --proof-path models/recursion/mlp$i/proof.json"
-    # run_benchmark "o1js" $i "node dist/mlp.js $i"
+    run_benchmark "o1js" $i "node dist/mlp_recursion.js $i"
     # run_benchmark "orion" $i "scarb run --path models/linear_regression/orion"
     # run_benchmark "orion" $i "jupyter nbconvert --to notebook --execute ./models/mlp/orion/orion.ipynb --output orion_output"
     # run_benchmark "risczero" $i "cd mlp_risczero && ./zkvm"
