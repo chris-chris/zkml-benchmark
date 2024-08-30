@@ -1,13 +1,12 @@
 import {
   Field,
   ZkProgram,
-  Int64,
+  UInt32,
   Provable,
   verify,
   Cache,
   SelfProof,
 } from "o1js";
-import * as fs from "fs/promises";
 
 import { relu } from "./relu";
 
@@ -15,8 +14,8 @@ var expNum = 0;
 var depth = -1;
 
 // 선형 변환을 수행하는 모듈화된 레이어 함수
-function linearLayer(input: Int64[], weights: Int64[], bias: Int64): Int64 {
-  let z = Int64.from(0);
+function linearLayer(input: UInt32[], weights: UInt32[], bias: UInt32): UInt32 {
+  let z = UInt32.from(0);
   for (let i = 0; i < weights.length; i++) {
     z = z.add(weights[i].mul(input[i]));
   }
@@ -25,7 +24,7 @@ function linearLayer(input: Int64[], weights: Int64[], bias: Int64): Int64 {
 }
 
 // 퍼셉트론 레이어를 처리하는 함수
-function perceptron(input: Int64[], weights: Int64[], bias: Int64): Int64 {
+function perceptron(input: UInt32[], weights: UInt32[], bias: UInt32): UInt32 {
   const z = linearLayer(input, weights, bias);
   return relu(z); // ReLU 활성화 함수 적용
 }
@@ -34,20 +33,20 @@ function perceptron(input: Int64[], weights: Int64[], bias: Int64): Int64 {
 function createMLPProgram(depth: number) {
   return ZkProgram({
     name: `MLP_Depth_${depth}`,
-    publicOutput: Int64,
+    publicOutput: UInt32,
     methods: {
       predict: {
-        privateInputs: [Provable.Array(Int64, 4)], // 4개의 입력값
-        async method(input: Int64[]): Promise<Int64> {
+        privateInputs: [Provable.Array(UInt32, 4)], // 4개의 입력값
+        async method(input: UInt32[]): Promise<UInt32> {
           let a = input;
           for (let i = 0; i < depth; i++) {
             const weights = [
-              Int64.from(1),
-              Int64.from(1),
-              Int64.from(1),
-              Int64.from(1),
+              UInt32.from(1),
+              UInt32.from(1),
+              UInt32.from(1),
+              UInt32.from(1),
             ];
-            const bias = Int64.from(1);
+            const bias = UInt32.from(1);
             a = [
               perceptron(a, weights, bias),
               perceptron(a, weights, bias),
@@ -56,8 +55,13 @@ function createMLPProgram(depth: number) {
             ];
           }
 
-          const weightsOut = [Int64.from(1), Int64.from(2), Int64.from(3), Int64.from(4)];
-          const biasOut = Int64.from(0);
+          const weightsOut = [
+            UInt32.from(1),
+            UInt32.from(2),
+            UInt32.from(3),
+            UInt32.from(4),
+          ];
+          const biasOut = UInt32.from(0);
           const zOut = linearLayer(a, weightsOut, biasOut);
 
           return zOut;
@@ -67,26 +71,45 @@ function createMLPProgram(depth: number) {
   });
 }
 
-// SecondMLPProgram 정의: Array 크기를 2^i로 설정한 10개의 함수
-const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
-  ZkProgram({
-    name: `SecondMLP_${i + 1}`,
-    publicOutput: Int64,
+// SecondMLPPrograms
+const SecondMLPProgram = ZkProgram({
+  name: `SecondMLP_${i + 1}`,
+  publicOutput: UInt32,
 
-    methods: {
-      computeFinal: {
-        privateInputs: [Provable.Array(Int64, 2 ** (i + 1))], // 'depth' 개의 입력값
-        async method(inputs: Int64[]): Promise<Int64> {
-          const weightsOut: Int64[] = Array(2 ** (i + 1)).fill(Int64.from(2));
-          const biasOut = Int64.from(0);
-          const finalOutput = linearLayer(inputs, weightsOut, biasOut);
+  methods: {
+    computeFinal: {
+      privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
+      async method(inputs: UInt32[]): Promise<UInt32> {
+        const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
+        const biasOut = UInt32.from(0);
+        const finalOutput = linearLayer(inputs, weightsOut, biasOut);
 
-          return finalOutput;
-        },
+        return finalOutput;
       },
     },
-  })
-);
+  },
+});
+
+// SecondMLPProgram 정의: Array 크기를 2^i로 설정한 10개의 함수
+// const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
+//   ZkProgram({
+//     name: `SecondMLP_${i + 1}`,
+//     publicOutput: UInt32,
+
+//     methods: {
+//       computeFinal: {
+//         privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
+//         async method(inputs: UInt32[]): Promise<UInt32> {
+//           const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
+//           const biasOut = UInt32.from(0);
+//           const finalOutput = linearLayer(inputs, weightsOut, biasOut);
+
+//           return finalOutput;
+//         },
+//       },
+//     },
+//   })
+// );
 
 // 모델 사용 예제
 (async () => {
@@ -101,10 +124,10 @@ const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
 
   // 입력 데이터 (4개의 입력값)
   const input = [
-    Int64.from(5),
-    Int64.from(3),
-    Int64.from(1),
-    Int64.from(0),
+    UInt32.from(5),
+    UInt32.from(3),
+    UInt32.from(1),
+    UInt32.from(0),
   ];
 
   // MLP 실행
@@ -118,13 +141,14 @@ const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
   const singleOutput = singleProof.publicOutput;
 
   // 첫 번째 MLP 결과를 depth 만큼 복사
-  const inputsArray: Int64[] = Array(depth).fill(singleOutput);
-  const proofsArray: SelfProof<undefined, Int64>[] = Array(depth).fill(singleProof);
+  const inputsArray: UInt32[] = Array(depth).fill(singleOutput);
+  // const proofsArray: SelfProof<undefined, UInt32>[] =
+  //   Array(depth).fill(singleProof);
   console.log(`First proof and output generated and copied ${depth} times.`);
 
   // 해당하는 SecondMLP 프로그램 선택
   console.log(`\nCreating SecondMLP_${expNum} model...`);
-  const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
+  // const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
 
   // SecondMLP 프로그램 컴파일
   const { verificationKey: vk2 } = await SecondMLPProgram.compile({
@@ -136,12 +160,11 @@ const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
   const finalProof = await SecondMLPProgram.computeFinal(inputsArray);
 
   // 증명 검증
-  console.log(`\nVerifying all the proofs, proof count: ${proofsArray.length + 1}`);
-  for (let i = 0; i < proofsArray.length; i++) {
-    await verify(proofsArray[i].toJSON(), vk1);
-  }
-  const isValidFinalProof = await verify(finalProof.toJSON(), vk2);
+  // console.log(`\nVerifying all the proofs, proof count: ${proofsArray.length + 1}`);
+  // for (let i = 0; i < proofsArray.length; i++) {
+  //   await verify(proofsArray[i].toJSON(), vk1);
+  //}
+  // const isValidFinalProof = await verify(finalProof.toJSON(), vk2);
 
-  console.log(`Final proof is valid:`, isValidFinalProof);
+  // console.log(`Final proof is valid:`, isValidFinalProof);
 })();
-
