@@ -4,7 +4,7 @@ const o1js_1 = require("o1js");
 const relu_1 = require("./relu");
 // 선형 변환을 수행하는 모듈화된 레이어 함수
 function linearLayer(input, weights, bias) {
-    let z = o1js_1.Int64.from(0);
+    let z = o1js_1.UInt32.from(0);
     for (let i = 0; i < weights.length; i++) {
         z = z.add(weights[i].mul(input[i]));
     }
@@ -20,31 +20,29 @@ function perceptron(input, weights, bias) {
 function createMLPProgram(depth) {
     return (0, o1js_1.ZkProgram)({
         name: `MLP_Depth_${depth}`,
-        publicOutput: o1js_1.Int64,
+        publicOutput: o1js_1.UInt32,
         methods: {
             predict: {
-                privateInputs: [o1js_1.Provable.Array(o1js_1.Int64, 5)], // 5개의 입력값
+                privateInputs: [o1js_1.Provable.Array(o1js_1.UInt32, 4)], // 4개의 입력값
                 async method(input) {
                     let a = input;
                     for (let i = 0; i < depth; i++) {
                         const weights = [
-                            o1js_1.Int64.from(0),
-                            o1js_1.Int64.from(0),
-                            o1js_1.Int64.from(0),
-                            o1js_1.Int64.from(0),
-                            o1js_1.Int64.from(0),
+                            o1js_1.UInt32.from(0),
+                            o1js_1.UInt32.from(0),
+                            o1js_1.UInt32.from(0),
+                            o1js_1.UInt32.from(0),
                         ];
-                        const bias = o1js_1.Int64.from(0);
+                        const bias = o1js_1.UInt32.from(0);
                         a = [
-                            perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
                         ];
                     }
-                    const weightsOut = [o1js_1.Int64.from(0)];
-                    const biasOut = o1js_1.Int64.from(0);
+                    const weightsOut = [o1js_1.UInt32.from(0)];
+                    const biasOut = o1js_1.UInt32.from(0);
                     const zOut = linearLayer(a, weightsOut, biasOut);
                     return zOut;
                 },
@@ -64,14 +62,8 @@ function createMLPProgram(depth) {
     console.log(`Creating MLP model with depth ${depth}...`);
     // MLP 모델 생성
     const MLP = createMLPProgram(depth);
-    // 입력 데이터 (5개의 입력값)
-    let input = [
-        o1js_1.Int64.from(0),
-        o1js_1.Int64.from(0),
-        o1js_1.Int64.from(0),
-        o1js_1.Int64.from(0),
-        o1js_1.Int64.from(0),
-    ];
+    // 입력 데이터 (4개의 입력값)
+    let input = [o1js_1.UInt32.from(0), o1js_1.UInt32.from(0), o1js_1.UInt32.from(0), o1js_1.UInt32.from(0)];
     // MLP 실행
     const { verificationKey } = await MLP.compile({
         cache: o1js_1.Cache.FileSystemDefault,

@@ -7,6 +7,7 @@ import {
   Cache,
   SelfProof,
 } from "o1js";
+import * as fs from "fs/promises";
 
 import { relu } from "./relu";
 
@@ -72,44 +73,27 @@ function createMLPProgram(depth: number) {
 }
 
 // SecondMLPPrograms
-const SecondMLPProgram = ZkProgram({
-  name: `SecondMLP_${i + 1}`,
-  publicOutput: UInt32,
-
-  methods: {
-    computeFinal: {
-      privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
-      async method(inputs: UInt32[]): Promise<UInt32> {
-        const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
-        const biasOut = UInt32.from(0);
-        const finalOutput = linearLayer(inputs, weightsOut, biasOut);
-
-        return finalOutput;
-      },
-    },
-  },
-});
 
 // SecondMLPProgram 정의: Array 크기를 2^i로 설정한 10개의 함수
-// const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
-//   ZkProgram({
-//     name: `SecondMLP_${i + 1}`,
-//     publicOutput: UInt32,
+const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
+  ZkProgram({
+    name: `SecondMLP_${i + 1}`,
+    publicOutput: UInt32,
 
-//     methods: {
-//       computeFinal: {
-//         privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
-//         async method(inputs: UInt32[]): Promise<UInt32> {
-//           const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
-//           const biasOut = UInt32.from(0);
-//           const finalOutput = linearLayer(inputs, weightsOut, biasOut);
+    methods: {
+      computeFinal: {
+        privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
+        async method(inputs: UInt32[]): Promise<UInt32> {
+          const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
+          const biasOut = UInt32.from(0);
+          const finalOutput = linearLayer(inputs, weightsOut, biasOut);
 
-//           return finalOutput;
-//         },
-//       },
-//     },
-//   })
-// );
+          return finalOutput;
+        },
+      },
+    },
+  })
+);
 
 // 모델 사용 예제
 (async () => {
@@ -148,7 +132,7 @@ const SecondMLPProgram = ZkProgram({
 
   // 해당하는 SecondMLP 프로그램 선택
   console.log(`\nCreating SecondMLP_${expNum} model...`);
-  // const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
+  const SecondMLPProgram = SecondMLPPrograms[expNum - 1]; // expNum에 따라 프로그램 선택
 
   // SecondMLP 프로그램 컴파일
   const { verificationKey: vk2 } = await SecondMLPProgram.compile({
