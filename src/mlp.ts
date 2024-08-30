@@ -1,14 +1,9 @@
 import {
-  Field,
   ZkProgram,
   Int64,
   Provable,
-  verify,
-  UInt32,
-  UInt64,
   Cache,
 } from "o1js";
-import * as fs from "fs/promises";
 
 import { relu } from "./relu";
 // 선형 변환을 수행하는 모듈화된 레이어 함수

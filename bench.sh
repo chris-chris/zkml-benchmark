@@ -22,9 +22,9 @@ run_benchmark() {
     local command=$3
     local log_file="logs/${framework}_mlp${exp_num}_log.txt"
 
-    if [ "$framework" == "ezkl" ]; then
-        EXP_NUM=$exp_num jupyter nbconvert --to notebook --execute models/mlp/mlp.ipynb
-    fi
+    # if [ "$framework" == "ezkl" ]; then
+    #     EXP_NUM=$exp_num jupyter nbconvert --to notebook --execute models/mlp22/mlp.ipynb
+    # fi
 
     echo "Running ${framework} script for MLP experiment $exp_num..."
 
@@ -44,14 +44,13 @@ run_benchmark() {
 }
 
 # MLP 모델에 대한 실험 루프
-# for i in {1..5}; do
-
-for i in {1..1}; do
+for i in {1..5}; do
     run_benchmark "ezkl" $i "ezkl prove --witness models/mlp/mlp$i/witness.json --pk-path models/mlp/mlp$i/pk.key --compiled-circuit models/mlp/mlp$i/model.compiled --proof-path models/mlp/mlp$i/proof.json"
-    run_benchmark "o1js" $i "node dist/mlp.js $i"
+    run_benchmark "o1js" $i "node dist/mlp_recursion.js $i"
+    # run_benchmark "o1js" $i "node dist/mlp.js $i"
     # run_benchmark "orion" $i "scarb run --path models/linear_regression/orion"
     # run_benchmark "orion" $i "jupyter nbconvert --to notebook --execute ./models/mlp/orion/orion.ipynb --output orion_output"
-    run_benchmark "risczero" $i "cd mlp_risczero && ./zkvm"
+    # run_benchmark "risczero" $i "cd mlp_risczero && ./zkvm"
 done
 
 echo "Experiment completed. Results saved to $output_csv."
