@@ -16,7 +16,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "o1js": "^1.6.0"
+    "o1js": "^1.6.0",
+    "tsc": "^2.0.4"
   },
   "devDependencies": {
     "@types/node": "^14.14.31",
