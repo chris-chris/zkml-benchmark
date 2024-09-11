@@ -6,7 +6,7 @@ var expNum = 0;
 var depth = -1;
 // 선형 변환을 수행하는 모듈화된 레이어 함수
 function linearLayer(input, weights, bias) {
-    let z = o1js_1.UInt32.from(0);
+    let z = o1js_1.Int64.from(0);
     for (let i = 0; i < weights.length; i++) {
         z = z.add(weights[i].mul(input[i]));
     }
@@ -22,20 +22,20 @@ function perceptron(input, weights, bias) {
 function createMLPProgram(depth) {
     return (0, o1js_1.ZkProgram)({
         name: `MLP_Depth_${depth}`,
-        publicOutput: o1js_1.UInt32,
+        publicOutput: o1js_1.Int64,
         methods: {
             predict: {
-                privateInputs: [o1js_1.Provable.Array(o1js_1.UInt32, 4)], // 4개의 입력값
+                privateInputs: [o1js_1.Provable.Array(o1js_1.Int64, 4)], // 4개의 입력값
                 async method(input) {
                     let a = input;
                     for (let i = 0; i < depth; i++) {
                         const weights = [
-                            o1js_1.UInt32.from(1),
-                            o1js_1.UInt32.from(1),
-                            o1js_1.UInt32.from(1),
-                            o1js_1.UInt32.from(1),
+                            o1js_1.Int64.from(1),
+                            o1js_1.Int64.from(1),
+                            o1js_1.Int64.from(1),
+                            o1js_1.Int64.from(1),
                         ];
-                        const bias = o1js_1.UInt32.from(1);
+                        const bias = o1js_1.Int64.from(1);
                         a = [
                             perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
@@ -44,21 +44,21 @@ function createMLPProgram(depth) {
                         ];
                     }
                     const weightsOut = [
-                        o1js_1.UInt32.from(1),
-                        o1js_1.UInt32.from(2),
-                        o1js_1.UInt32.from(3),
-                        o1js_1.UInt32.from(4),
+                        o1js_1.Int64.from(1),
+                        o1js_1.Int64.from(2),
+                        o1js_1.Int64.from(3),
+                        o1js_1.Int64.from(4),
                     ];
-                    const biasOut = o1js_1.UInt32.from(0);
+                    const biasOut = o1js_1.Int64.from(0);
                     const zOut = linearLayer(a, weightsOut, biasOut);
                     return zOut;
                 },
             },
             computeFinal: {
-                privateInputs: [o1js_1.Provable.Array(o1js_1.UInt32, depth)], // 'depth' 개의 입력값
+                privateInputs: [o1js_1.Provable.Array(o1js_1.Int64, depth)], // 'depth' 개의 입력값
                 async method(inputs) {
-                    const weightsOut = Array(depth).fill(o1js_1.UInt32.from(0));
-                    const biasOut = o1js_1.UInt32.from(0);
+                    const weightsOut = Array(depth).fill(o1js_1.Int64.from(0));
+                    const biasOut = o1js_1.Int64.from(0);
                     const finalOutput = linearLayer(inputs, weightsOut, biasOut);
                     return finalOutput;
                 },
@@ -71,13 +71,13 @@ function createMLPProgram(depth) {
 // const SecondMLPPrograms = Array.from({ length: 10 }, (_, i) =>
 //   ZkProgram({
 //     name: `SecondMLP_${i + 1}`,
-//     publicOutput: UInt32,
+//     publicOutput: Int64,
 //     methods: {
 //       computeFinal: {
-//         privateInputs: [Provable.Array(UInt32, 2 ** (i + 1))], // 'depth' 개의 입력값
-//         async method(inputs: UInt32[]): Promise<UInt32> {
-//           const weightsOut: UInt32[] = Array(2 ** (i + 1)).fill(UInt32.from(2));
-//           const biasOut = UInt32.from(0);
+//         privateInputs: [Provable.Array(Int64, 2 ** (i + 1))], // 'depth' 개의 입력값
+//         async method(inputs: Int64[]): Promise<Int64> {
+//           const weightsOut: Int64[] = Array(2 ** (i + 1)).fill(Int64.from(2));
+//           const biasOut = Int64.from(0);
 //           const finalOutput = linearLayer(inputs, weightsOut, biasOut);
 //           return finalOutput;
 //         },
@@ -88,13 +88,13 @@ function createMLPProgram(depth) {
 // function createSecondProgram(depth: number) {
 //   return ZkProgram({
 //     name: `SecondMLP_${depth}`,
-//     publicOutput: UInt32,
+//     publicOutput: Int64,
 //     methods: {
 //       computeFinal: {
-//         privateInputs: [Provable.Array(UInt32, depth)], // 'depth' 개의 입력값
-//         async method(inputs: UInt32[]): Promise<UInt32> {
-//           const weightsOut: UInt32[] = Array(depth).fill(UInt32.from(2));
-//           const biasOut = UInt32.from(0);
+//         privateInputs: [Provable.Array(Int64, depth)], // 'depth' 개의 입력값
+//         async method(inputs: Int64[]): Promise<Int64> {
+//           const weightsOut: Int64[] = Array(depth).fill(Int64.from(2));
+//           const biasOut = Int64.from(0);
 //           const finalOutput = linearLayer(inputs, weightsOut, biasOut);
 //           return finalOutput;
 //         },
@@ -115,10 +115,10 @@ function createMLPProgram(depth) {
     console.log(`seconds: ${seconds}s`);
     // 입력 데이터 (4개의 입력값)
     const input = [
-        o1js_1.UInt32.from(5),
-        o1js_1.UInt32.from(3),
-        o1js_1.UInt32.from(1),
-        o1js_1.UInt32.from(0),
+        o1js_1.Int64.from(5),
+        o1js_1.Int64.from(3),
+        o1js_1.Int64.from(1),
+        o1js_1.Int64.from(0),
     ];
     // MLP 실행
     const { verificationKey: vk1 } = await FirstMLP.compile({
@@ -134,7 +134,7 @@ function createMLPProgram(depth) {
     console.log(`seconds: ${seconds}s`);
     // 첫 번째 MLP 결과를 depth 만큼 복사
     const inputsArray = Array(depth).fill(singleOutput);
-    // const proofsArray: SelfProof<undefined, UInt32>[] =
+    // const proofsArray: SelfProof<undefined, Int64>[] =
     //   Array(depth).fill(singleProof);
     console.log(`First proof and output generated and copied ${depth} times.`);
     var seconds = (new Date().getTime() - startDate.getTime()) / 1000;
