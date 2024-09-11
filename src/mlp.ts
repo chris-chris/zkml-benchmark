@@ -30,9 +30,9 @@ function createMLPProgram(depth: number) {
           for (let i = 0; i < depth; i++) {
             const weights = [
               Int64.from(1),
+              Int64.from(-1),
               Int64.from(1),
-              Int64.from(1),
-              Int64.from(1),
+              Int64.from(-1),
             ];
             const bias = Int64.from(1);
             a = [

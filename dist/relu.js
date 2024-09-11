@@ -8,6 +8,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.relu = void 0;
 const o1js_1 = require("o1js");
 const relu = (input) => {
-    return o1js_1.Provable.if(input.isPositiveV2(), input, o1js_1.Int64.from(0));
+    return o1js_1.Provable.if(input.isPositiveV2(), o1js_1.Int64.from(1), o1js_1.Int64.from(0));
 };
 exports.relu = relu;

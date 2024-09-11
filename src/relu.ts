@@ -7,5 +7,5 @@
 import { Provable, Int64 } from "o1js";
 
 export const relu = (input: Int64): Int64 => {
-  return Provable.if(input.isPositiveV2(), input, Int64.from(0));
+  return Provable.if(input.isPositiveV2(), Int64.from(1), Int64.from(0));
 };

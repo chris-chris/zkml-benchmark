@@ -29,9 +29,9 @@ function createMLPProgram(depth) {
                     for (let i = 0; i < depth; i++) {
                         const weights = [
                             o1js_1.Int64.from(1),
+                            o1js_1.Int64.from(-1),
                             o1js_1.Int64.from(1),
-                            o1js_1.Int64.from(1),
-                            o1js_1.Int64.from(1),
+                            o1js_1.Int64.from(-1),
                         ];
                         const bias = o1js_1.Int64.from(1);
                         a = [
