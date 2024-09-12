@@ -42,13 +42,10 @@ run_benchmark() {
 }
 
 # MLP 모델에 대한 실험 루프
-# for i in {1..5}; do
 for i in $(seq 1 15)
-# for i in 12 13 14 15 16 17 18 19 20 21 22 23 24 25 # 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15
 do
-# for ((i = 1; i <= 2; i++)); do
-    # run_benchmark "ezkl" $i "ezkl prove --witness models/mlp/mlp$i/witness.json --pk-path models/mlp/mlp$i/pk.key --compiled-circuit models/mlp/mlp$i/model.compiled --proof-path models/mlp/mlp$i/proof.json"
-    # run_benchmark "o1js" $i "node dist/mlp.js $i"
+    run_benchmark "ezkl" $i "ezkl prove --witness models/mlp/mlp$i/witness.json --pk-path models/mlp/mlp$i/pk.key --compiled-circuit models/mlp/mlp$i/model.compiled --proof-path models/mlp/mlp$i/proof.json"
+    run_benchmark "o1js" $i "node dist/mlp.js $i"
     run_benchmark "kimchi" $i "cargo run --manifest-path /home/ubuntu/zkml-benchmark/kimchi_exp/Cargo.toml $i"
     # run_benchmark "orion" $i "scarb run --path models/linear_regression/orion"
     # run_benchmark "orion" $i "jupyter nbconvert --to notebook --execute ./models/mlp/orion/orion.ipynb --output orion_output"
