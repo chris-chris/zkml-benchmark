@@ -4,8 +4,8 @@
 // relu function for Snarky-ML
 // relu takes a Field and outputs a Field.
 
-import { Provable, UInt32 } from "o1js";
+import { Provable, Int64 } from "o1js";
 
-export const relu = (input: UInt32): UInt32 => {
-  return Provable.if(input.greaterThan(new UInt32(0)), input, new UInt32(0));
+export const relu = (input: Int64): Int64 => {
+  return Provable.if(input.isPositiveV2(), Int64.from(1), Int64.from(0));
 };

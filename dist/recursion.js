@@ -23,26 +23,28 @@ function createMLPProgram(depth) {
         publicOutput: o1js_1.Int64,
         methods: {
             predict: {
-                privateInputs: [o1js_1.Provable.Array(o1js_1.Int64, 4)], // 4개의 입력값
+                privateInputs: [o1js_1.Provable.Array(o1js_1.Int64, 5)], // 5개의 입력값
                 async method(input) {
                     let a = input;
                     for (let i = 0; i < depth; i++) {
                         const weights = [
-                            o1js_1.Int64.from(1),
-                            o1js_1.Int64.from(-1),
-                            o1js_1.Int64.from(1),
-                            o1js_1.Int64.from(-1),
+                            o1js_1.Int64.from(0),
+                            o1js_1.Int64.from(0),
+                            o1js_1.Int64.from(0),
+                            o1js_1.Int64.from(0),
+                            o1js_1.Int64.from(0),
                         ];
-                        const bias = o1js_1.Int64.from(1);
+                        const bias = o1js_1.Int64.from(0);
                         a = [
+                            perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
                             perceptron(a, weights, bias),
                         ];
                     }
-                    const weightsOut = [o1js_1.Int64.from(1)];
-                    const biasOut = o1js_1.Int64.from(1);
+                    const weightsOut = [o1js_1.Int64.from(0)];
+                    const biasOut = o1js_1.Int64.from(0);
                     const zOut = linearLayer(a, weightsOut, biasOut);
                     return zOut;
                 },
@@ -52,10 +54,8 @@ function createMLPProgram(depth) {
 }
 // 모델 사용 예제
 (async () => {
-    console.profile();
     const args = process.argv.slice(2); // 명령줄 인수 받기
     const expNum = parseInt(args[0], 10); // 첫 번째 인수를 depth로 사용
-    console.log(`expNum: ${expNum}`);
     // if (isNaN(depth) || depth < 1 || depth > 5) {
     //   console.error("Please provide a valid depth (1-5).");
     //   process.exit(1);
@@ -64,34 +64,23 @@ function createMLPProgram(depth) {
     console.log(`Creating MLP model with depth ${depth}...`);
     // MLP 모델 생성
     const MLP = createMLPProgram(depth);
-    // 입력 데이터 (4개의 입력값)
-    let input = [o1js_1.Int64.from(0), o1js_1.Int64.from(0), o1js_1.Int64.from(0), o1js_1.Int64.from(0)];
+    // 입력 데이터 (5개의 입력값)
+    let input = [
+        o1js_1.Int64.from(0),
+        o1js_1.Int64.from(0),
+        o1js_1.Int64.from(0),
+        o1js_1.Int64.from(0),
+        o1js_1.Int64.from(0),
+    ];
     // MLP 실행
     const { verificationKey } = await MLP.compile({
         cache: o1js_1.Cache.FileSystemDefault,
         forceRecompile: false,
     });
     console.log(`Making proof for MLP with depth ${depth}...`);
-    const predict = (await MLP.analyzeMethods()).predict;
-    const gates = predict.gates;
-    const summary = predict.summary();
-    // console.log(`circuit summary: ${summary["Total rows"]} ${summary.EndoMulScalar}`);
-    // console.log(`circuit gates: ${gates.length}`);
-    // 각 게이트의 세부 정보를 출력
-    // gates.forEach((gate, index) => {
-    //   console.log(`Gate ${index + 1}:`);
-    //   console.log(`  Type: ${gate.type}`);
-    //   console.log(`  Wires: ${gate.wires.length}`);
-    //   gate.wires.forEach((wire, i) => {
-    //     console.log(`    Wire ${i + 1}: col ${wire.col} row ${wire.col}`);
-    //   });
-    //   console.log(`  Coeffs: ${gate.coeffs}`);
-    // });
     const proof = await MLP.predict(input);
     // console.log(`Proof created for MLP with depth ${depth}: `, proof.proof);
     console.log("Value: ", proof.publicOutput.toString());
-    console.log("proof: ", proof);
-    console.profileEnd();
     // const isValid = await verify(proof, verificationKey);
     // console.log(`Proof is valid for depth ${depth}:`, isValid);
 })();
