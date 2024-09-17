@@ -185,9 +185,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "cc"
-version = "1.1.18"
+version = "1.1.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b62ac837cdb5cb22e10a256099b4fc502b1dfe560cb282963a974d7abd80e476"
+checksum = "45bcde016d64c21da4be18b655631e5ab6d3107607e71a73a9f53eb48aae23fb"
 dependencies = [
  "shlex",
 ]
@@ -388,7 +388,7 @@ dependencies = [
 [[package]]
 name = "groupmap"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -433,9 +433,9 @@ dependencies = [
 
 [[package]]
 name = "iana-time-zone"
-version = "0.1.60"
+version = "0.1.61"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e7ffbb5a1b541ea2561f8c41c087286cc091e21e556a4f09a8f6cbf17b69b141"
+checksum = "235e081f3925a06703c2d0117ea8b91f042756fd6e7a6e5d901e8ca1a996b220"
 dependencies = [
  "android_system_properties",
  "core-foundation-sys",
@@ -485,7 +485,11 @@ dependencies = [
 [[package]]
 name = "internal-tracing"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
+dependencies = [
+ "serde",
+ "serde_json",
+]
 
 [[package]]
 name = "itertools"
@@ -514,7 +518,7 @@ dependencies = [
 [[package]]
 name = "kimchi"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -579,7 +583,7 @@ checksum = "78ca9ab1a0babb1e7d5695e3530886289c18cf2f87ec19a575a0abdce112e3a3"
 [[package]]
 name = "mina-curves"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -589,7 +593,7 @@ dependencies = [
 [[package]]
 name = "mina-poseidon"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -653,7 +657,7 @@ dependencies = [
 [[package]]
 name = "o1-utils"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -699,7 +703,7 @@ dependencies = [
 [[package]]
 name = "poly-commitment"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
 dependencies = [
  "ark-ec",
  "ark-ff",
@@ -947,7 +951,7 @@ checksum = "0fda2ff0d084019ba4d7c6f371c95d8fd75ce3524c3cb8fb653a3023f6323e64"
 [[package]]
 name = "snarky-deriver"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
 dependencies = [
  "convert_case",
  "itertools",
@@ -1063,7 +1067,7 @@ dependencies = [
 [[package]]
 name = "turshi"
 version = "0.1.0"
-source = "git+https://github.com/o1-labs/proof-systems?branch=master#dd32f3ef825a9dbe60c8abac9ff839dc4b481de6"
+source = "git+https://github.com/o1-labs/proof-systems#9282dcd2947ae52eb39a2bcc24d17b369f2f6f57"
 dependencies = [
  "ark-ff",
  "hex",
@@ -1090,9 +1094,9 @@ checksum = "e91b56cd4cadaeb79bbf1a5645f6b4f8dc5bde8834ad5894a8db35fda9efa1fe"
 
 [[package]]
 name = "unicode-segmentation"
-version = "1.11.0"
+version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d4c87d22b6e3f4a18d4d40ef354e97c90fcb14dd91d7dc0aa9d8a1172ebf7202"
+checksum = "f6ccf251212114b54433ec949fd6a7841275f9ada20dddd2f29e9ceea4501493"
 
 [[package]]
 name = "version_check"
