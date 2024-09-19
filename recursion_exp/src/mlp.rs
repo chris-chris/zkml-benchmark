@@ -2,7 +2,6 @@ use std::array;
 use std::time::Instant;
 use kimchi::{
     circuits::{
-        polynomials::generic::testing::{create_circuit, fill_in_witness},
         wires::COLUMNS,
     },
     proof::ProverProof,
@@ -15,7 +14,7 @@ use kimchi::mina_poseidon::{
     constants::PlonkSpongeConstantsKimchi,
     sponge::{DefaultFqSponge, DefaultFrSponge},
 };
-use kimchi::poly_commitment::{commitment::CommitmentCurve, evaluation_proof::OpeningProof, srs::SRS};
+use kimchi::poly_commitment::{commitment::CommitmentCurve};
 
 type SpongeParams = PlonkSpongeConstantsKimchi;
 type BaseSponge = DefaultFqSponge<VestaParameters, SpongeParams>;
@@ -27,23 +26,24 @@ use kimchi::{
     circuits::{gate::CircuitGate, polynomials::generic::GenericGateSpec, wires::Wire},
 };
 
-pub fn create_mux_gate(row: usize, condition: Fp, true_value: Fp, false_value: Fp) -> CircuitGate<Fp> {
-    // MUX 조건부 게이트의 로직:
-    // Output = condition * true_value + (1 - condition) * false_value
-    let output_value = condition * true_value + (Fp::from(1) - condition) * false_value;
+// #[warn(unused_variables)]
+// pub fn create_mux_gate(row: usize, condition: Fp, true_value: Fp, false_value: Fp) -> CircuitGate<Fp> {
+//     // MUX 조건부 게이트의 로직:
+//     // Output = condition * true_value + (1 - condition) * false_value
+//     let output_value = condition * true_value + (Fp::from(1) - condition) * false_value;
 
-    // 게이트 생성
-    CircuitGate::create_generic_gadget(
-        Wire::for_row(row),
-        GenericGateSpec::Mul {
-            // condition * true_value
-            mul_coeff: Some(condition),
-            // (1 - condition) * false_value
-            output_coeff: None,
-        },
-        None,
-    )
-}
+//     // 게이트 생성
+//     CircuitGate::create_generic_gadget(
+//         Wire::for_row(row),
+//         GenericGateSpec::Mul {
+//             // condition * true_value
+//             mul_coeff: Some(condition),
+//             // (1 - condition) * false_value
+//             output_coeff: None,
+//         },
+//         None,
+//     )
+// }
 
 pub fn create_mlp_circuit(input_size: usize, depth: usize) -> Vec<CircuitGate<Fp>> {
     let mut gates = vec![];
@@ -173,10 +173,10 @@ kimchi::poly_commitment::evaluation_proof::OpeningProof<ark_ec::short_weierstras
     fill_in_mlp_witness(0, &mut witness, &public, public.len(), depth);
 
     let index = new_index_for_test(gates, public.len());
-    let verifier_index = index.verifier_index();
+    // let verifier_index = index.verifier_index();
 
-    let verifier_index_serialize =
-        serde_json::to_string(&verifier_index).expect("couldn't serialize index");
+    // let verifier_index_serialize =
+    //     serde_json::to_string(&verifier_index).expect("couldn't serialize index");
 
     // verify the circuit satisfiability by the computed witness
     index.verify(&witness, &public).unwrap();

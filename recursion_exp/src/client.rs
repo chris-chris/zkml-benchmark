@@ -1,9 +1,7 @@
-use ark_ff::{BigInteger, PrimeField};
+use ark_ff::PrimeField;
 use kimchi::mina_curves::pasta::Fp;
-use kimchi::poly_commitment;
-use kimchi::poly_commitment::commitment::{get_msm_accumulated_time, get_msm_function_call_count};
 use tokio::net::TcpStream;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::AsyncWriteExt;
 use serde::{Deserialize, Serialize};
 use bincode;
 use std::env;
@@ -40,6 +38,10 @@ pub fn fp_to_integer(fp: Fp) -> u128 {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    println!("Wait for 10 seconds before connecting to the server...");
+    // wait for 10 seconds
+    tokio::time::sleep(tokio::time::Duration::from_secs(10)).await;
+
     // 명령줄 인수에서 서버 주소를 가져옵니다.
     let args: Vec<String> = env::args().collect();
     let server_addr = if args.len() > 1 {
@@ -72,6 +74,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let msm_count = kimchi::poly_commitment::commitment::get_msm_function_call_count();
     println!("msm_time: {:?}", msm_time.as_secs_f32());
     println!("msm_count: {:?}", msm_count);
+
+    let ntt_time = kimchi::prover::get_ntt_accumulated_time();
+    let ntt_count = kimchi::prover::get_ntt_function_call_count();
+    println!("ntt_time: {:?}", ntt_time.as_secs_f32());
+    println!("ntt_count: {:?}", ntt_count);
 
     // 요청 생성
     // let number_request = NumberRequest {

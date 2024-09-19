@@ -1,8 +1,5 @@
-use ark_ff::{BigInteger, BigInteger256, PrimeField};
-use kimchi::mina_curves::pasta::Fp;
-use kimchi::proof::ProverProof;
 use tokio::net::TcpListener;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::AsyncReadExt;
 use serde::{Deserialize, Serialize};
 use bincode;
 use tokio::sync::Notify;
@@ -36,7 +33,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
     } else {
         "1".to_string().parse::<u32>().unwrap_or(1)
     };
-    
+
     let target = Box::new(File::create("log/server.log").expect("Can't create file"));
 
     env_logger::Builder::new()
