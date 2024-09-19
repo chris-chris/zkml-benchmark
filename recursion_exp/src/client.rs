@@ -1,3 +1,5 @@
+use ark_ff::{BigInteger, PrimeField};
+use kimchi::mina_curves::pasta::Fp;
 use tokio::net::TcpStream;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use serde::{Deserialize, Serialize};
@@ -16,7 +18,20 @@ struct NumberRequest {
 
 #[derive(Serialize, Deserialize)]
 struct NumberResponse {
-    value: i32,
+    value: u128,
+}
+
+pub fn fp_to_integer(fp: Fp) -> u128 {
+    // Fp의 내부 표현을 BigInteger256으로 가져옵니다.
+    let big_integer = fp.into_repr();  // Fp에서 BigInteger256로 변환
+    
+    // BigInteger256은 4개의 u64 배열로 구성되어 있으므로, 이를 바이트로 변환
+    let mut result = 0u128;
+    for &part in big_integer.0.iter().rev() {
+        result = (result << 64) | part as u128;
+    }
+
+    result // 결과를 문자열로 변환하여 반환
 }
 
 #[tokio::main]
@@ -39,9 +54,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
         1
     };
 
-    let proof: kimchi::proof::ProverProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>, kimchi::poly_commitment::evaluation_proof::OpeningProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>>> = mlp_by_depth(exp);
-    let _proof: kimchi::poly_commitment::evaluation_proof::OpeningProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>> = proof.proof;
+    let result: (kimchi::proof::ProverProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>, kimchi::poly_commitment::evaluation_proof::OpeningProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>>>, Vec<Fp>) = mlp_by_depth(exp);
+
+    let _proof: kimchi::poly_commitment::evaluation_proof::OpeningProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>> = result.0.proof;
+    let public_output: Vec<Fp> = result.1;
+
     println!("_proof: {:?}", _proof);
+    println!("public_output: {:?}", public_output);
+    let public_output_u = fp_to_integer(public_output[0]);
+    println!("public_output_u: {:?}", public_output_u);
+
     // 요청 생성
     // let number_request = NumberRequest {
     //     message: "Please send your number".to_string(),
@@ -51,8 +73,16 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
     // 데이터 길이 전송
     socket.write_all(&data_length.to_be_bytes()).await?;
+
     // 데이터 전송
     socket.write_all(&request_data).await?;
+
+    let number_response = NumberResponse { value: public_output_u };
+    let response_data = bincode::serialize(&number_response).unwrap();
+    let data_length = response_data.len() as u32;
+
+    socket.write_all(&data_length.to_be_bytes()).await?;
+    socket.write_all(&response_data).await?;
 
     // let request_data = bincode::serialize(&_proof).unwrap();
 

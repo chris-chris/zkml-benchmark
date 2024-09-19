@@ -1,0 +1,40 @@
+version: "3.8"
+services:
+  # server:
+  #   build:
+  #     context: ./
+  #     dockerfile: ./Dockerfile
+  #   image: zkml-client:1.0
+  #   hostname: zkml-client
+  #   networks:
+  #     - mynet
+  #   command: cargo run --bin server
+  #   ports:
+  #     - "4000:4000"
+  #   container_name: server
+  #   volumes:
+  #     - ./log:/app/log
+
+  client:
+    build:
+      context: ./
+      dockerfile: ./Dockerfile
+    image: zkml-client:1.0
+    hostname: zkml-client
+    networks:
+      - mynet
+    # links:
+    #   - server
+    command: cargo run --bin client host.docker.internal:4000 1
+    # depends_on:
+    #   - server
+    deploy:
+      mode: replicated
+      replicas: 3
+
+# volumes:
+#   mysqldb:
+
+networks:
+  mynet:
+    driver: bridge

@@ -27,6 +27,23 @@ use kimchi::{
     circuits::{gate::CircuitGate, polynomials::generic::GenericGateSpec, wires::Wire},
 };
 
+pub fn create_mux_gate(row: usize, condition: Fp, true_value: Fp, false_value: Fp) -> CircuitGate<Fp> {
+    // MUX 조건부 게이트의 로직:
+    // Output = condition * true_value + (1 - condition) * false_value
+    let output_value = condition * true_value + (Fp::from(1) - condition) * false_value;
+
+    // 게이트 생성
+    CircuitGate::create_generic_gadget(
+        Wire::for_row(row),
+        GenericGateSpec::Mul {
+            // condition * true_value
+            mul_coeff: Some(condition),
+            // (1 - condition) * false_value
+            output_coeff: None,
+        },
+        None,
+    )
+}
 
 pub fn create_mlp_circuit(input_size: usize, depth: usize) -> Vec<CircuitGate<Fp>> {
     let mut gates = vec![];
@@ -46,19 +63,24 @@ pub fn create_mlp_circuit(input_size: usize, depth: usize) -> Vec<CircuitGate<Fp
     for _ in 0..depth {
         for _ in 0..input_size {
             let r = gates_row.next().unwrap();
-            let weight = Fp::from(3u32); // 가중치 값 (임의 설정)
-            let bias = Fp::from(1u32);   // 바이어스 값 (임의 설정)
+            let weight = Fp::from(0u32); // 가중치 값 (임의 설정)
+            let bias = Fp::from(0u32);   // 바이어스 값 (임의 설정)
 
             // 선형 변환: output = input * weight + bias
             let g1 = GenericGateSpec::Mul {
                 mul_coeff: Some(weight),
-                output_coeff: Some(bias),
+                output_coeff: None,
+            };
+            let g2 = GenericGateSpec::Add {
+                left_coeff: None,
+                right_coeff: Some(bias),
+                output_coeff: None,
             };
 
             gates.push(CircuitGate::create_generic_gadget(
                 Wire::for_row(r),
                 g1,
-                None,
+                Some(g2),
             ));
 
             // ReLU 활성화 함수
@@ -75,14 +97,12 @@ pub fn create_mlp_circuit(input_size: usize, depth: usize) -> Vec<CircuitGate<Fp
     }
 
     // 출력 레이어
-    for _ in 0..input_size {
-        let r = gates_row.next().unwrap();
-        gates.push(CircuitGate::create_generic_gadget(
-            Wire::for_row(r),
-            GenericGateSpec::Pub, // 출력값 처리
-            None,
-        ));
-    }
+    let r = gates_row.next().unwrap();
+    gates.push(CircuitGate::create_generic_gadget(
+        Wire::for_row(r),
+        GenericGateSpec::Pub, // 출력값 처리
+        None,
+    ));
 
     gates
 }
@@ -126,17 +146,16 @@ pub fn fill_in_mlp_witness<F: FftField>(
         }
     }
 
-    // 출력 레이어: 마지막 은닉층 결과를 witness에 저장
-    for _ in 0..input_size {
-        let r = witness_row.next().unwrap();
-        let final_output = witness[1][r]; // 은닉 레이어 결과값
-        witness[0][r] = final_output;     // 최종 출력값을 witness에 저장
-    }
+    // 출력 레이어: 마지막 은닉층 결과 중 하나를 witness에 저장
+    let final_output = witness[1][witness_row.next().unwrap()]; // 은닉 레이어 결과값 중 하나 선택
+    // println!("final_output: {:?}", final_output);
+    witness[0][witness_row.next().unwrap()] = final_output;     // 최종 출력값을 witness에 저장
+    
 }
 
 pub fn mlp_by_depth(exp: usize) 
--> ProverProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>, 
-kimchi::poly_commitment::evaluation_proof::OpeningProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>>> {
+-> (ProverProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>, 
+kimchi::poly_commitment::evaluation_proof::OpeningProof<ark_ec::short_weierstrass_jacobian::GroupAffine<kimchi::mina_curves::pasta::VestaParameters>>>, Vec<Fp>) {
 
     println!("run exp {}", exp);
 
@@ -167,8 +186,14 @@ kimchi::poly_commitment::evaluation_proof::OpeningProof<ark_ec::short_weierstras
 
     let start_proof = Instant::now();
     let proof =
-        ProverProof::create::<BaseSponge, ScalarSponge>(&group_map, witness, &[], &index)
+        ProverProof::create::<BaseSponge, ScalarSponge>(&group_map, witness.clone(), &[], &index)
             .unwrap();
     println!("- time to prove: {}ms", start_proof.elapsed().as_millis());
-    proof
+    println!("witness[0]: {:?}", witness[0]);
+    println!("witness[0][0]: {:?}", witness[0][0]);
+    // println!("witness.len() - 1: {:?}", witness.len() - 1);
+    // println!("witness[0].len() - 1: {:?}", witness[0].len() - 1);
+    let public_output: Vec<Fp> = vec![witness[0][0]];
+    println!("public_output: {:?}", public_output);
+    (proof, public_output)
 }

@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package aggregator;
+
+// 클라이언트가 구현할 서비스
+service Worker {
+  rpc GetNumber(Request) returns (Number);
+}
+
+// 메시지 정의
+message Request {
+  string message = 1;
+}
+
+message Number {
+  int32 value = 1;
+}
