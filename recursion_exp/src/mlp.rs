@@ -84,15 +84,15 @@ pub fn create_mlp_circuit(input_size: usize, depth: usize) -> Vec<CircuitGate<Fp
             ));
 
             // ReLU 활성화 함수
-            let r_relu = gates_row.next().unwrap();
-            gates.push(CircuitGate::create_generic_gadget(
-                Wire::for_row(r_relu),
-                GenericGateSpec::Mul {
-                    mul_coeff: Some(Fp::from(1u32)),  // 입력값 그대로 통과
-                    output_coeff: Some(Fp::from(0u32)),   // 음수일 경우 0으로 처리
-                },
-                None,
-            ));
+            // let r_relu = gates_row.next().unwrap();
+            // gates.push(CircuitGate::create_generic_gadget(
+            //     Wire::for_row(r_relu),
+            //     GenericGateSpec::Mul {
+            //         mul_coeff: Some(Fp::from(1u32)),  // 입력값 그대로 통과
+            //         output_coeff: Some(Fp::from(0u32)),   // 음수일 경우 0으로 처리
+            //     },
+            //     None,
+            // ));
         }
     }
 
@@ -129,27 +129,27 @@ pub fn fill_in_mlp_witness<F: FftField>(
             let r = witness_row.next().unwrap();
 
             let input_val = witness[0][r]; // 이전 레이어 출력값
-            let weight = F::from(3u32);    // 가중치 값
-            let bias = F::from(1u32);      // 바이어스 값
+            let weight = F::from(0u32);    // 가중치 값
+            let bias = F::from(0u32);      // 바이어스 값
 
             // 선형 변환: output = input * weight + bias
             let linear_output = input_val * weight + bias;
 
             // ReLU 적용: 음수일 경우 0으로 변환
-            let relu_output = if linear_output > F::zero() {
-                linear_output
-            } else {
-                F::zero()
-            };
+            // let relu_output = if linear_output > F::zero() {
+            //     linear_output
+            // } else {
+            //     F::zero()
+            // };
 
-            witness[1][r] = relu_output;    // ReLU 결과를 witness에 저장
+            witness[1][r] = linear_output;    // ReLU 결과를 witness에 저장
         }
     }
 
     // 출력 레이어: 마지막 은닉층 결과 중 하나를 witness에 저장
-    let final_output = witness[1][witness_row.next().unwrap()]; // 은닉 레이어 결과값 중 하나 선택
+    // let final_output = witness[1][witness_row.next().unwrap()]; // 은닉 레이어 결과값 중 하나 선택
     // println!("final_output: {:?}", final_output);
-    witness[0][witness_row.next().unwrap()] = final_output;     // 최종 출력값을 witness에 저장
+    // witness[0][witness[0]] = final_output;     // 최종 출력값을 witness에 저장
     
 }
 
