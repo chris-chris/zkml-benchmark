@@ -5,7 +5,9 @@ use tokio::net::TcpListener;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use serde::{Deserialize, Serialize};
 use bincode;
+use tokio::sync::Notify;
 use std::error::Error;
+use std::sync::{Arc, Mutex};
 use env_logger;
 use chrono::Local;
 use log::*;
@@ -45,9 +47,22 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let listener = TcpListener::bind("0.0.0.0:4000").await?;
     info!("Server listening on port 4000");
 
+    let connection_start_time = Arc::new(Mutex::new(None::<chrono::NaiveDateTime>));
+    let public_output_count = Arc::new(Mutex::new(0));
+    let notify = Arc::new(Notify::new());
+    
     loop {
         let (mut socket, addr) = listener.accept().await?;
         info!("New connection from {}", addr);
+        
+        // Record the time of the first connection
+        let connection_start_time = Arc::clone(&connection_start_time);
+        if connection_start_time.lock().unwrap().is_none() {
+            *connection_start_time.lock().unwrap() = Some(Local::now().naive_utc());
+        }
+
+        let public_output_count = Arc::clone(&public_output_count);
+        let notify = Arc::clone(&notify);
 
         tokio::spawn(async move {
             // 데이터 길이 읽기 (4바이트)
@@ -93,14 +108,29 @@ async fn main() -> Result<(), Box<dyn Error>> {
             let number_response: NumberResponse = bincode::deserialize(&buffer[..]).unwrap();
             info!("Received public_output as u128: {:?}", number_response.value);
 
-            // 응답 생성
-            let response_data = bincode::serialize(&number_response).unwrap();
+            // Increase the count and check if it is the 32nd client
+            let mut count = public_output_count.lock().unwrap();
+            *count += 1;
 
-            // 응답 전송
-            if let Err(e) = socket.write_all(&response_data).await {
-                eprintln!("Failed to write to socket; err = {:?}", e);
-                return;
+            if *count == 32 {
+                let end_time = Local::now().naive_utc();
+                let start_time = connection_start_time.lock().unwrap().clone().unwrap();
+                let duration = end_time - start_time;
+                info!("Time taken for 32nd public_output: {:?}", duration);
+                std::process::exit(0);
             }
+
+            // Notify that public output has been received
+            notify.notify_one();
+
+            // // 응답 생성
+            // let response_data = bincode::serialize(&number_response).unwrap();
+
+            // // 응답 전송
+            // if let Err(e) = socket.write_all(&response_data).await {
+            //     eprintln!("Failed to write to socket; err = {:?}", e);
+            //     return;
+            // }
 
             // // 응답 생성
             // let number_response = NumberResponse { value: 42 };
