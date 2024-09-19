@@ -1,3 +1,5 @@
 [submodule "recursion_exp/proof-systems"]
 	path = recursion_exp/proof-systems
-	url = https://github.com/o1-labs/proof-systems
+	url = https://github.com/chris-chris/proof-systems
+	branch = feat/msm1
+
