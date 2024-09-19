@@ -1,5 +1,7 @@
 use ark_ff::{BigInteger, PrimeField};
 use kimchi::mina_curves::pasta::Fp;
+use kimchi::poly_commitment;
+use kimchi::poly_commitment::commitment::{get_msm_accumulated_time, get_msm_function_call_count};
 use tokio::net::TcpStream;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use serde::{Deserialize, Serialize};
@@ -18,7 +20,9 @@ struct NumberRequest {
 
 #[derive(Serialize, Deserialize)]
 struct NumberResponse {
-    value: u128,
+    public_output: u128,
+    msm_call_count: u64,
+    msm_accumulated_time: f32,
 }
 
 pub fn fp_to_integer(fp: Fp) -> u128 {
@@ -64,6 +68,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     let public_output_u = fp_to_integer(public_output[0]);
     println!("public_output_u: {:?}", public_output_u);
 
+    let msm_time = kimchi::poly_commitment::commitment::get_msm_accumulated_time();
+    let msm_count = kimchi::poly_commitment::commitment::get_msm_function_call_count();
+    println!("msm_time: {:?}", msm_time.as_secs_f32());
+    println!("msm_count: {:?}", msm_count);
+
     // 요청 생성
     // let number_request = NumberRequest {
     //     message: "Please send your number".to_string(),
@@ -77,7 +86,11 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // 데이터 전송
     socket.write_all(&request_data).await?;
 
-    let number_response = NumberResponse { value: public_output_u };
+    let number_response = NumberResponse { 
+        public_output: public_output_u,
+        msm_call_count: msm_count,
+        msm_accumulated_time: msm_time.as_secs_f32(),
+    };
     let response_data = bincode::serialize(&number_response).unwrap();
     let data_length = response_data.len() as u32;
 

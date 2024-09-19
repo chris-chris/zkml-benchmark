@@ -6,6 +6,7 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use serde::{Deserialize, Serialize};
 use bincode;
 use tokio::sync::Notify;
+use std::env;
 use std::error::Error;
 use std::sync::{Arc, Mutex};
 use env_logger;
@@ -21,11 +22,21 @@ struct NumberRequest {
 
 #[derive(Serialize, Deserialize)]
 struct NumberResponse {
-    value: u128,
+    public_output: u128,
+    msm_call_count: u64,
+    msm_accumulated_time: f32,
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
+    let args: Vec<String> = env::args().collect();
+
+    let client_count: u32 = if args.len() > 1 {
+        args[1].to_string().parse::<u32>().unwrap_or(1)
+    } else {
+        "1".to_string().parse::<u32>().unwrap_or(1)
+    };
+    
     let target = Box::new(File::create("log/server.log").expect("Can't create file"));
 
     env_logger::Builder::new()
@@ -106,17 +117,19 @@ async fn main() -> Result<(), Box<dyn Error>> {
 
             // 메시지 역직렬화
             let number_response: NumberResponse = bincode::deserialize(&buffer[..]).unwrap();
-            info!("Received public_output as u128: {:?}", number_response.value);
+            info!("Received public_output: {:?}", number_response.public_output);
+            info!("Received msm_accumulated_time: {:?}", number_response.msm_accumulated_time);
+            info!("Received msm_call_count: {:?}", number_response.msm_call_count);
 
             // Increase the count and check if it is the 32nd client
             let mut count = public_output_count.lock().unwrap();
             *count += 1;
 
-            if *count == 32 {
+            if *count == client_count {
                 let end_time = Local::now().naive_utc();
                 let start_time = connection_start_time.lock().unwrap().clone().unwrap();
                 let duration = end_time - start_time;
-                info!("Time taken for 32nd public_output: {:?}", duration);
+                info!("Time taken for {} public_output: {:?}", client_count, duration);
                 std::process::exit(0);
             }
 

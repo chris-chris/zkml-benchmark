@@ -8,12 +8,19 @@ services:
     hostname: zkml-client
     networks:
       - mynet
-    command: cargo run --bin server
+    command: cargo run --bin server 3
+    environment:
+      - RUSTFLAGS=-Awarnings
     ports:
       - "4000:4000"
     container_name: server
     volumes:
       - ./log:/app/log
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1G
 
   client:
     build:
@@ -26,18 +33,17 @@ services:
     links:
       - server
     command: cargo run --bin client server:4000 1
+    environment:
+      - RUSTFLAGS=-Awarnings
     depends_on:
       - server
     deploy:
       mode: replicated
-      replicas: 32
+      replicas: 3
       resources:
         limits:
           cpus: "1.0"
           memory: 2G
-
-# volumes:
-#   mysqldb:
 
 networks:
   mynet:
