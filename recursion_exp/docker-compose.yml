@@ -9,8 +9,8 @@ services:
     networks:
       - mynet
     command: cargo run --bin server 3
-    environment:
-      - RUSTFLAGS=-Awarnings
+    # environment:
+    #   - RUSTFLAGS=-Awarnings
     ports:
       - "4000:4000"
     container_name: server
@@ -33,8 +33,8 @@ services:
     links:
       - server
     command: cargo run --bin client server:4000 1
-    environment:
-      - RUSTFLAGS=-Awarnings
+    # environment:
+    #   - RUSTFLAGS=-Awarnings
     depends_on:
       - server
     deploy:
