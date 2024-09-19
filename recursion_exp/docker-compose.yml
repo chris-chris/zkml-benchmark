@@ -31,6 +31,10 @@ services:
     deploy:
       mode: replicated
       replicas: 32
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 2G
 
 # volumes:
 #   mysqldb:
