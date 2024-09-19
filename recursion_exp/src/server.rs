@@ -34,7 +34,15 @@ async fn main() -> Result<(), Box<dyn Error>> {
         "1".to_string().parse::<u32>().unwrap_or(1)
     };
 
-    let target = Box::new(File::create("log/server.log").expect("Can't create file"));
+    let exp_num: u32 = if args.len() > 2 {
+        args[2].to_string().parse::<u32>().unwrap_or(1)
+    } else {
+        "1".to_string().parse::<u32>().unwrap_or(1)
+    };
+
+    // path: log/exp_{client_count}.log
+    let path = format!("log/exp{}_{}.log", exp_num, client_count);
+    let target = Box::new(File::create(path).expect("Can't create file"));
 
     env_logger::Builder::new()
         .target(env_logger::Target::Pipe(target))
