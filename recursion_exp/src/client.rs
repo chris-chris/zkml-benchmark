@@ -90,12 +90,12 @@ async fn main() -> Result<(), Box<dyn Error>> {
     // socket.write_all(&request_data).await?;
 
     // 응답 읽기
-    let mut buffer = [0u8; 1024];
-    let n = socket.read(&mut buffer).await?;
+    // let mut buffer = [0u8; 1024];
+    // let n = socket.read(&mut buffer).await?;
 
-    // 응답 역직렬화
-    let number_response: NumberResponse = bincode::deserialize(&buffer[..n]).unwrap();
-    println!("Received number: {}", number_response.value);
+    // // 응답 역직렬화
+    // let number_response: NumberResponse = bincode::deserialize(&buffer[..n]).unwrap();
+    // println!("Received number: {}", number_response.value);
 
     Ok(())
 }

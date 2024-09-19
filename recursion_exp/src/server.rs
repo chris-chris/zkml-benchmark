@@ -42,7 +42,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
         })
         .init();
     
-    let listener = TcpListener::bind("127.0.0.1:4000").await?;
+    let listener = TcpListener::bind("0.0.0.0:4000").await?;
     info!("Server listening on port 4000");
 
     loop {
@@ -72,35 +72,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
             > = bincode::deserialize(&buffer[..]).unwrap();
             info!("Received message: {:?}", proof);
             
-            // // public_output 데이터 길이 읽기
-            // let mut length_buffer = [0u8; 4];
-            // if let Err(e) = socket.read_exact(&mut length_buffer).await {
-            //     eprintln!("Failed to read public_output length; err = {:?}", e);
-            //     return;
-            // }
-
-            // let public_output_length = u32::from_be_bytes(length_buffer) as usize;
-            // info!("public_output data_length: {:?}", public_output_length);
-
-            // // public_output 데이터 읽기
-            // let mut public_output_buffer = vec![0u8; public_output_length];
-            // socket.read_exact(&mut public_output_buffer).await;
-
-            // // 바이트 데이터를 Fp로 변환
-            // let public_output: Vec<Fp> = public_output_buffer.chunks(32)  // 32바이트 청크로 분할
-            //     .map(|chunk| {
-            //         // BigInteger256로 변환
-            //         let mut repr = BigInteger256::default();
-            //         for (i, chunk_8bytes) in chunk.chunks(8).enumerate() {
-            //             repr.0[i] = u64::from_be_bytes(chunk_8bytes.try_into().unwrap());
-            //         }
-            //         // Fp로 변환
-            //         Fp::new(repr)
-            //     })
-            //     .collect();
-
-            // info!("public_output: {:?}", public_output);
-
+            // public_output 데이터 길이 읽기
             // 데이터 길이 읽기 (4바이트)
             let mut length_buffer = [0u8; 4];
             if let Err(e) = socket.read_exact(&mut length_buffer).await {
