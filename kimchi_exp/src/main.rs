@@ -51,7 +51,7 @@ fn main() {
     println!("public.len() {}", public.len());
     let gates = create_mlp_circuit(public.len(), depth);
 
-    println!("gates_count: {}", gates.len());
+    println!("gate_count: {}", gates.len());
 
     // create witness
     let mut witness: [Vec<Fp>; COLUMNS] = array::from_fn(|_| vec![Fp::zero(); gates.len()]);
