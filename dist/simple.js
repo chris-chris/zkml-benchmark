@@ -19,36 +19,20 @@ function perceptron(input, weights, bias) {
 // MLP 모델 정의
 function createMLPProgram(depth) {
     return (0, o1js_1.ZkProgram)({
-        name: `MLP_Depth_${depth}`,
+        name: `Simple_Depth_${depth}`,
         publicOutput: o1js_1.Int64,
         methods: {
             predict: {
-                privateInputs: [o1js_1.Provable.Array(o1js_1.Int64, 4)], // 4개의 입력값
+                privateInputs: [o1js_1.Provable.Array(o1js_1.Int64, 1)], // 4개의 입력값
                 async method(input) {
                     let a = input;
-                    for (let i = 0; i < depth; i++) {
-                        const weights = [
-                            o1js_1.Int64.from(1),
-                            o1js_1.Int64.from(-1),
-                            o1js_1.Int64.from(1),
-                            o1js_1.Int64.from(-1),
-                        ];
-                        const bias = o1js_1.Int64.from(1);
-                        a = [
-                            perceptron(a, weights, bias),
-                            perceptron(a, weights, bias),
-                            perceptron(a, weights, bias),
-                            perceptron(a, weights, bias),
-                        ];
-                    }
-                    const weightsOut = [
-                        o1js_1.Int64.from(1),
-                        o1js_1.Int64.from(1),
-                        o1js_1.Int64.from(1),
-                        o1js_1.Int64.from(1),
-                    ];
+                    const weightsOut = o1js_1.Int64.from(1);
                     const biasOut = o1js_1.Int64.from(1);
-                    const zOut = linearLayer(a, weightsOut, biasOut);
+                    let zOut = o1js_1.Int64.from(0);
+                    //   const zOut = linearLayer(a, weightsOut, biasOut);
+                    for (let i = 0; i < a.length; i++) {
+                        zOut = zOut.add(a[i]);
+                    }
                     return zOut;
                 },
             },
@@ -70,7 +54,7 @@ function createMLPProgram(depth) {
     // MLP 모델 생성
     const MLP = createMLPProgram(depth);
     // 입력 데이터 (4개의 입력값)
-    let input = [o1js_1.Int64.from(0), o1js_1.Int64.from(0), o1js_1.Int64.from(0), o1js_1.Int64.from(0)];
+    let input = [o1js_1.Int64.from(0)];
     // MLP 실행
     const { verificationKey } = await MLP.compile({
         cache: o1js_1.Cache.FileSystemDefault,
@@ -81,7 +65,7 @@ function createMLPProgram(depth) {
     const gates = predict.gates;
     const summary = predict.summary();
     console.log(`circuit summary: ${summary["Total rows"]} ${summary.EndoMulScalar}`);
-    console.log(`gate_count: ${gates.length}`);
+    console.log(`circuit gates: ${gates.length}`);
     // 각 게이트의 세부 정보를 출력
     // gates.forEach((gate, index) => {
     //   console.log(`Gate ${index + 1}:`);
@@ -92,11 +76,7 @@ function createMLPProgram(depth) {
     //   });
     //   console.log(`  Coeffs: ${gate.coeffs}`);
     // });
-    // time profiling
-    const start = Date.now();
     const proof = await MLP.predict(input);
-    const end = Date.now();
-    console.log(`prove_time: ${(end - start) / 1000}`);
     // console.log(`Proof created for MLP with depth ${depth}: `, proof.proof);
     console.log("Value: ", proof.publicOutput.toString());
     console.log("proof: ", proof);
