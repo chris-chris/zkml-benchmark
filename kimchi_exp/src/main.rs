@@ -51,15 +51,17 @@ fn main() {
     println!("public.len() {}", public.len());
     let gates = create_mlp_circuit(public.len(), depth);
 
+    println!("gates_count: {}", gates.len());
+
     // create witness
     let mut witness: [Vec<Fp>; COLUMNS] = array::from_fn(|_| vec![Fp::zero(); gates.len()]);
     fill_in_mlp_witness(0, &mut witness, &public, public.len(), depth);
 
     let index = new_index_for_test(gates, public.len());
-    let verifier_index = index.verifier_index();
+    // let verifier_index = index.verifier_index();
 
-    let verifier_index_serialize =
-        serde_json::to_string(&verifier_index).expect("couldn't serialize index");
+    // let verifier_index_serialize =
+    //     serde_json::to_string(&verifier_index).expect("couldn't serialize index");
 
     // verify the circuit satisfiability by the computed witness
     index.verify(&witness, &public).unwrap();
@@ -72,6 +74,16 @@ fn main() {
         ProverProof::create::<BaseSponge, ScalarSponge>(&group_map, witness, &[], &index)
             .unwrap();
     println!("- time to prove: {}ms", start_proof.elapsed().as_millis());
+
+    let msm_time = kimchi::poly_commitment::commitment::get_msm_accumulated_time();
+    let msm_count = kimchi::poly_commitment::commitment::get_msm_function_call_count();
+    println!("msm_time: {:?}", msm_time.as_secs_f32());
+    println!("msm_count: {:?}", msm_count);
+
+    let ntt_time = kimchi::prover::get_ntt_accumulated_time();
+    let ntt_count = kimchi::prover::get_ntt_function_call_count();
+    println!("ntt_time: {:?}", ntt_time.as_secs_f32());
+    println!("ntt_count: {:?}", ntt_count);
 
     // // deserialize the verifier index
     // let mut verifier_index_deserialize: VerifierIndex<GroupAffine<VestaParameters>, _> =
