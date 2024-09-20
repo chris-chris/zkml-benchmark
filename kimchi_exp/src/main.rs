@@ -73,7 +73,7 @@ fn main() {
     let proof =
         ProverProof::create::<BaseSponge, ScalarSponge>(&group_map, witness, &[], &index)
             .unwrap();
-    println!("- time to prove: {}ms", start_proof.elapsed().as_millis());
+    println!("prove_time: {}", start_proof.elapsed().as_secs_f32());
 
     let msm_time = kimchi::poly_commitment::commitment::get_msm_accumulated_time();
     let msm_count = kimchi::poly_commitment::commitment::get_msm_function_call_count();
